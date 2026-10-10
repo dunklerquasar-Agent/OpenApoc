@@ -206,7 +206,7 @@ class BattleUnitAnimationPack : public StateObject<BattleUnitAnimationPack>
 	                StateRef<AEquipmentType> heldItem, Vec2<int> facing, BodyState currentBody,
 	                BodyState targetBody, HandState currentHands, HandState targetHands,
 	                MovementState movement, int body_animation_delay, int hands_animation_delay,
-	                int distance_travelled, bool visible);
+	                int distance_travelled, bool visible, float zoom = 1.0f);
 
 	// Draw unit's body and held item
 	// firingAngle is 0 for 0-15 degrees, 1 for 15-30 degrees and 2 for 30+ degrees, positive is up
@@ -216,7 +216,8 @@ class BattleUnitAnimationPack : public StateObject<BattleUnitAnimationPack>
 	              StateRef<AEquipmentType> heldItem, Vec2<int> facing, BodyState currentBody,
 	              BodyState targetBody, HandState currentHands, HandState targetHands,
 	              MovementState movement, int body_animation_delay, int hands_animation_delay,
-	              int distance_travelled, int firingAngle, bool visible, bool stealth);
+	              int distance_travelled, int firingAngle, bool visible, bool stealth,
+	              float zoom = 1.0f);
 
 	// high level api for loading
 	bool loadAnimationPack(GameState &state, const UString &path);

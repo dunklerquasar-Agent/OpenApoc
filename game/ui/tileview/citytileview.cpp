@@ -925,7 +925,9 @@ void CityTileView::render()
 				// Detection of aliens
 				if (b->detected)
 				{
-					float initialRadius = std::max(alertImage->size.x, alertImage->size.y);
+					// Pixel size, so it follows the zoom
+					float initialRadius =
+					    std::max(alertImage->size.x, alertImage->size.y) * getZoom();
 					// Eventually scale to 1/2 the size, but start with some bonus time of full
 					// size,
 					// so that it doesn't become distorted immediately, that's why we add extra 0.05
@@ -940,7 +942,7 @@ void CityTileView::render()
 
 					if (radius == initialRadius)
 					{
-						r.draw(alertImage, pos);
+						r.drawScaled(alertImage, pos, {radius, radius}, Renderer::Scaler::Linear);
 					}
 					else
 					{
@@ -961,7 +963,9 @@ void CityTileView::render()
 				if (hasCargo)
 				{
 					nearestExpiry -= state.gameTime.getTicks();
-					float initialRadius = std::max(cargoImage->size.x, cargoImage->size.y);
+					// Pixel size, so it follows the zoom
+					float initialRadius =
+					    std::max(cargoImage->size.x, cargoImage->size.y) * getZoom();
 					// Eventually scale to 1/2 the size, but start with some bonus time of full
 					// size,
 					// so that it doesn't become distorted immediately, that's why we add extra 0.05
@@ -975,7 +979,7 @@ void CityTileView::render()
 
 					if (radius == initialRadius)
 					{
-						r.draw(cargoImage, pos);
+						r.drawScaled(cargoImage, pos, {radius, radius}, Renderer::Scaler::Linear);
 					}
 					else
 					{

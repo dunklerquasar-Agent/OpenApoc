@@ -141,11 +141,20 @@ int BattleUnitAnimationPack::getFrameCountFiring(StateRef<AEquipmentType> heldIt
 		return 0;
 }
 
+template <typename T, typename U>
+Vec2<float> scaledPosition(Vec2<float> screenPosition, Vec2<T> offsetA, Vec2<U> offsetB,
+                           float zoom)
+{
+	return screenPosition - Vec2<float>{((float)offsetA.x + (float)offsetB.x) * zoom,
+	                                    ((float)offsetA.y + (float)offsetB.y) * zoom};
+}
+
 void BattleUnitAnimationPack::drawShadow(
     Renderer &r, Vec2<float> screenPosition, StateRef<BattleUnitImagePack> shadow,
     StateRef<AEquipmentType> heldItem, Vec2<int> facing, BodyState currentBody,
     BodyState targetBody, HandState currentHands, HandState targetHands, MovementState movement,
-    int body_animation_delay, int hands_animation_delay, int distance_travelled, bool visible)
+    int body_animation_delay, int hands_animation_delay, int distance_travelled,
+    bool visible, float zoom)
 {
 	if (!visible)
 	{
@@ -218,20 +227,31 @@ void BattleUnitAnimationPack::drawShadow(
 	if (b.index == -1)
 		return;
 
-	r.draw(shadow->images[b.index], screenPosition - b.offset - shadow->image_offset);
+	Vec2<float> shadowPos =
+	    scaledPosition(screenPosition, b.offset, shadow->image_offset, zoom);
+	Vec2<float> shadowSize{(float)shadow->images[b.index]->size.x * zoom,
+	                       (float)shadow->images[b.index]->size.y * zoom};
+	r.drawScaled(shadow->images[b.index], shadowPos, shadowSize,
+	             Renderer::Scaler::Linear);
 }
 
-void draw(Renderer &r, sp<Image> sprite, Vec2<float> screenPosition, bool transparent)
+// Applies two offsets given in unscaled screen pixels to a screen position, scaled by the
+// zoom factor. Templated because the offsets come in as Vec2<int> as well as Vec2<float>.
+void draw(Renderer &r, sp<Image> sprite, Vec2<float> screenPosition, bool transparent,
+          float zoom)
 {
 	static const Colour COLOUR_TRANSPARENT = {255, 255, 255, 95};
 
 	if (transparent)
 	{
+		// FIXME: The renderer has no scaled variant of drawTinted, so cloaked units are
+		// drawn at their native size and appear too large when zoomed in.
 		r.drawTinted(sprite, screenPosition, COLOUR_TRANSPARENT);
 	}
 	else
 	{
-		r.draw(sprite, screenPosition);
+		Vec2<float> scaledSize{(float)sprite->size.x * zoom, (float)sprite->size.y * zoom};
+		r.drawScaled(sprite, screenPosition, scaledSize, Renderer::Scaler::Linear);
 	}
 }
 
@@ -241,8 +261,8 @@ void BattleUnitAnimationPack::drawUnit(
     StateRef<BattleUnitImagePack> leftHand, StateRef<BattleUnitImagePack> rightHand,
     StateRef<AEquipmentType> heldItem, Vec2<int> facing, BodyState currentBody,
     BodyState targetBody, HandState currentHands, HandState targetHands, MovementState movement,
-    int body_animation_delay, int hands_animation_delay, int distance_travelled, int firingAngle,
-    bool visible, bool stealth)
+    int body_animation_delay, int hands_animation_delay, int distance_travelled,
+    int firingAngle, bool visible, bool stealth, float zoom)
 {
 	if (!visible)
 	{
@@ -386,8 +406,7 @@ void BattleUnitAnimationPack::drawUnit(
 					         body->images.size(), b->index);
 					break;
 				}
-				draw(r, body->images[b->index], screenPosition - b->offset - body->image_offset,
-				     stealth);
+				draw(r, body->images[b->index], scaledPosition(screenPosition, b->offset, body->image_offset, zoom), stealth, zoom);
 				break;
 			case AnimationEntry::Frame::UnitImagePart::Legs:
 				if (!legs)
@@ -398,8 +417,7 @@ void BattleUnitAnimationPack::drawUnit(
 					         legs->images.size(), b->index);
 					break;
 				}
-				draw(r, legs->images[b->index], screenPosition - b->offset - legs->image_offset,
-				     stealth);
+				draw(r, legs->images[b->index], scaledPosition(screenPosition, b->offset, legs->image_offset, zoom), stealth, zoom);
 				break;
 			case AnimationEntry::Frame::UnitImagePart::Helmet:
 				if (!helmet)
@@ -410,8 +428,7 @@ void BattleUnitAnimationPack::drawUnit(
 					         helmet->images.size(), b->index);
 					break;
 				}
-				draw(r, helmet->images[b->index], screenPosition - b->offset - helmet->image_offset,
-				     stealth);
+				draw(r, helmet->images[b->index], scaledPosition(screenPosition, b->offset, helmet->image_offset, zoom), stealth, zoom);
 				break;
 			case AnimationEntry::Frame::UnitImagePart::LeftArm:
 				if (!leftHand)
@@ -423,7 +440,7 @@ void BattleUnitAnimationPack::drawUnit(
 					break;
 				}
 				draw(r, leftHand->images[b->index],
-				     screenPosition - b->offset - leftHand->image_offset, stealth);
+				     scaledPosition(screenPosition, b->offset, leftHand->image_offset, zoom), stealth, zoom);
 				break;
 			case AnimationEntry::Frame::UnitImagePart::RightArm:
 				if (!rightHand)
@@ -435,7 +452,7 @@ void BattleUnitAnimationPack::drawUnit(
 					break;
 				}
 				draw(r, rightHand->images[b->index],
-				     screenPosition - b->offset - rightHand->image_offset, stealth);
+				     scaledPosition(screenPosition, b->offset, rightHand->image_offset, zoom), stealth, zoom);
 				break;
 			case AnimationEntry::Frame::UnitImagePart::Weapon:
 				if (!heldItem)
@@ -448,7 +465,7 @@ void BattleUnitAnimationPack::drawUnit(
 					break;
 				}
 				draw(r, heldItem->held_image_pack->images[b->index],
-				     screenPosition - b->offset - heldItem->held_image_pack->image_offset, stealth);
+				     scaledPosition(screenPosition, b->offset, heldItem->held_image_pack->image_offset, zoom), stealth, zoom);
 				break;
 			// Travis complains I'm not handling "Shadow"
 			case AnimationEntry::Frame::UnitImagePart::Shadow:

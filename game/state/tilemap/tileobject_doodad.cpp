@@ -14,7 +14,7 @@ void TileObjectDoodad::draw(Renderer &r, TileTransform &transform, Vec2<float> s
 		return;
 	}
 
-	std::ignore = transform;
+	const float zoom = transform.getZoom();
 	// Mode isn't used as TileView::tileToScreenCoords already transforms according to the mode
 	auto doodad = this->doodad.lock();
 	if (!doodad)
@@ -28,7 +28,9 @@ void TileObjectDoodad::draw(Renderer &r, TileTransform &transform, Vec2<float> s
 	{
 		case TileViewMode::Isometric:
 			sprite = doodad->getSprite();
-			transformedScreenPos -= doodad->getImageOffset();
+			// Pixel offsets are in unscaled screen space, so they follow the zoom
+			transformedScreenPos -= Vec2<float>{doodad->getImageOffset().x * zoom,
+			                                    doodad->getImageOffset().y * zoom};
 			break;
 		case TileViewMode::Strategy:
 			// no doodads on strategy view?
@@ -36,7 +38,7 @@ void TileObjectDoodad::draw(Renderer &r, TileTransform &transform, Vec2<float> s
 		default:
 			LogError("Unsupported view mode");
 	}
-	drawTinted(r, sprite, transformedScreenPos, visible);
+	drawTinted(r, sprite, transformedScreenPos, visible, zoom);
 }
 
 TileObjectDoodad::~TileObjectDoodad() = default;

@@ -9,8 +9,9 @@
 namespace OpenApoc
 {
 
-void TileObjectBattleHazard::draw(Renderer &r, TileTransform &, Vec2<float> screenPosition,
-                                  TileViewMode mode, bool visible, int, bool, bool)
+void TileObjectBattleHazard::draw(Renderer &r, TileTransform &transform,
+                                   Vec2<float> screenPosition, TileViewMode mode, bool visible, int,
+                                   bool, bool)
 {
 	if (!visible)
 	{
@@ -18,6 +19,7 @@ void TileObjectBattleHazard::draw(Renderer &r, TileTransform &, Vec2<float> scre
 	}
 	// Mode isn't used as TileView::tileToScreenCoords already transforms according to the mode
 	std::ignore = mode;
+	const float zoom = transform.getZoom();
 
 	auto h = hazard.lock();
 
@@ -32,7 +34,10 @@ void TileObjectBattleHazard::draw(Renderer &r, TileTransform &, Vec2<float> scre
 	{
 		case TileViewMode::Isometric:
 			sprite = h->hazardType->getFrame(h->age, h->frame);
-			transformedScreenPos -= h->hazardType->doodadType->imageOffset;
+			// Pixel offsets are in unscaled screen space, so they follow the zoom
+			transformedScreenPos -=
+			    Vec2<float>{h->hazardType->doodadType->imageOffset.x * zoom,
+			                h->hazardType->doodadType->imageOffset.y * zoom};
 			break;
 		case TileViewMode::Strategy:
 		{
@@ -43,7 +48,7 @@ void TileObjectBattleHazard::draw(Renderer &r, TileTransform &, Vec2<float> scre
 			LogError("Unsupported view mode");
 	}
 	if (sprite)
-		drawTinted(r, sprite, transformedScreenPos, visible);
+		drawTinted(r, sprite, transformedScreenPos, visible, zoom);
 }
 
 TileObjectBattleHazard::~TileObjectBattleHazard() = default;

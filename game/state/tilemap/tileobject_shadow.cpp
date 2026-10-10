@@ -20,7 +20,7 @@ void TileObjectShadow::draw(Renderer &r, TileTransform &transform, Vec2<float> s
 {
 	if (!visible)
 		return;
-	std::ignore = transform;
+	const float zoom = transform.getZoom();
 	auto vehicle = this->ownerVehicle.lock();
 	auto unit = this->ownerBattleUnit.lock();
 	auto item = this->ownerBattleItem.lock();
@@ -39,8 +39,13 @@ void TileObjectShadow::draw(Renderer &r, TileTransform &transform, Vec2<float> s
 		{
 			if (vehicle)
 			{
-				r.draw(vehicle->type->directional_shadow_sprites[vehicle->shadowDirection],
-				       screenPosition - vehicle->type->shadow_offset);
+				// Pixel offsets are in unscaled screen space, so they follow the zoom
+				auto vShadow = vehicle->type->directional_shadow_sprites[vehicle->shadowDirection];
+				Vec2<float> vPos = screenPosition -
+				                   Vec2<float>{vehicle->type->shadow_offset.x * zoom,
+				                               vehicle->type->shadow_offset.y * zoom};
+				Vec2<float> vSize{(float)vShadow->size.x * zoom, (float)vShadow->size.y * zoom};
+				r.drawScaled(vShadow, vPos, vSize, Renderer::Scaler::Linear);
 			}
 			if (unit)
 			{
@@ -53,7 +58,7 @@ void TileObjectShadow::draw(Renderer &r, TileTransform &transform, Vec2<float> s
 				    unit->current_hand_state, unit->target_hand_state,
 				    unit->usingLift ? MovementState::None : unit->current_movement_state,
 				    unit->getBodyAnimationFrame(), unit->getHandAnimationFrame(),
-				    unit->getDistanceTravelled(), visible);
+				    unit->getDistanceTravelled(), visible, zoom);
 			}
 			if (item)
 			{
@@ -61,8 +66,13 @@ void TileObjectShadow::draw(Renderer &r, TileTransform &transform, Vec2<float> s
 				if (!item->falling)
 					break;
 				if (item->item->type->dropped_shadow_sprite)
-					r.draw(item->item->type->dropped_shadow_sprite,
-					       screenPosition - item->item->type->shadow_offset);
+					// Pixel offsets are in unscaled screen space, so they follow the zoom
+					auto iShadow = item->item->type->dropped_shadow_sprite;
+					Vec2<float> iPos = screenPosition -
+					                   Vec2<float>{item->item->type->shadow_offset.x * zoom,
+					                               item->item->type->shadow_offset.y * zoom};
+					Vec2<float> iSize{(float)iShadow->size.x * zoom, (float)iShadow->size.y * zoom};
+					r.drawScaled(iShadow, iPos, iSize, Renderer::Scaler::Linear);
 			}
 			break;
 		}

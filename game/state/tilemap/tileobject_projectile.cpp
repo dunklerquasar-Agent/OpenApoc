@@ -12,6 +12,7 @@ void TileObjectProjectile::draw(Renderer &r, TileTransform &transform, Vec2<floa
 {
 	// Mode isn't used as TileView::tileToScreenCoords already transforms according to the mode
 	std::ignore = mode;
+	const float zoom = transform.getZoom();
 	auto projectile = this->projectile.lock();
 	if (!projectile)
 	{
@@ -40,7 +41,7 @@ void TileObjectProjectile::draw(Renderer &r, TileTransform &transform, Vec2<floa
 		}
 		if (*sprite_it != nullptr)
 		{
-			drawTinted(r, *sprite_it, pos, visible);
+			drawTinted(r, *sprite_it, pos, visible, zoom);
 		}
 		sprite_it++;
 	}
