@@ -29,8 +29,16 @@ class TileView : public Stage, public TileTransform
 
   protected:
 	TileMap &map;
+	// Tile sizes actually used for drawing and coordinate conversion. These are the
+	// base sizes scaled by zoomLevel, see setZoomLevel().
 	Vec3<int> isoTileSize;
 	Vec2<int> stratTileSize;
+	// Tile sizes as passed to the constructor. zoomLevel is applied on top of these
+	// so that repeated zoom changes cannot accumulate rounding errors.
+	Vec3<int> isoTileSizeBase;
+	Vec2<int> stratTileSizeBase;
+	// Current zoom factor, 1.0f means native (unscaled) tile size
+	float zoomLevel = 1.0f;
 	TileViewMode viewMode;
 
 	bool scrollUpKB = false;
@@ -66,6 +74,21 @@ class TileView : public Stage, public TileTransform
 	TileView(TileMap &map, Vec3<int> isoTileSize, Vec2<int> stratTileSize,
 	         TileViewMode initialMode);
 	~TileView() override;
+
+	// Zoom support ---------------------------------------------------------------
+	// The discrete zoom steps the view snaps to, 1.0f being the native tile size
+	static const std::vector<float> ZOOM_LEVELS;
+
+	// Zoom factor currently applied, where 1.0f means native tile size
+	float getZoom() const override;
+	// Index into ZOOM_LEVELS of the zoom step currently applied
+	int getZoomStep() const;
+	// Applies the zoom step nearest to the requested factor. The view stays centred
+	// on the same tile, so zooming does not move the camera.
+	void setZoomLevel(float zoom);
+	// Step to the next larger / smaller entry of ZOOM_LEVELS, if there is one
+	void zoomIn();
+	void zoomOut();
 
 	Vec2<int> getScreenOffset() const;
 	virtual void setScreenCenterTile(Vec2<float> center);

@@ -85,7 +85,10 @@ class TileObject : public std::enable_shared_from_this<TileObject>
 
 	TileMap &map;
 
-	static void drawTinted(Renderer &r, sp<Image> sprite, Vec2<float> position, bool visible);
+	// Draws the sprite, scaled by 'zoom' to match the tile size the active TileView
+	// reports. Kept as a default argument so existing callers stay unscaled.
+	static void drawTinted(Renderer &r, sp<Image> sprite, Vec2<float> position, bool visible,
+	                       float zoom = 1.0f);
 
 	// TileObjects are not copy-able
 	TileObject(const TileObject &) = delete;

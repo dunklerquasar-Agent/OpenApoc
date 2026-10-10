@@ -60,6 +60,11 @@ class TileTransform
   public:
 	virtual Vec2<float> tileToScreenCoords(Vec3<float> coords) const = 0;
 	virtual Vec3<float> screenToTileCoords(Vec2<float> screenPos, float z) const = 0;
+	// Zoom factor the view applies on top of the native tile size, where 1.0f means
+	// no zoom. TileObject::draw() uses this to scale its sprites so that they match
+	// the tile size the transform reports. Transforms that do not support zoom keep
+	// the default and draw unscaled.
+	virtual float getZoom() const { return 1.0f; }
 };
 
 enum class TileViewMode

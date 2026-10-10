@@ -16,7 +16,7 @@ static const Colour COLOUR_TRANSPARENT_BLACK = {255, 255, 255, 128};
 void TileObjectScenery::draw(Renderer &r, TileTransform &transform, Vec2<float> screenPosition,
                              TileViewMode mode, bool visible, int, bool, bool)
 {
-	std::ignore = transform;
+	const float zoom = transform.getZoom();
 	// Mode isn't used as TileView::tileToScreenCoords already transforms according to the mode
 	auto scenery = this->scenery.lock();
 	if (!scenery)
@@ -34,7 +34,9 @@ void TileObjectScenery::draw(Renderer &r, TileTransform &transform, Vec2<float> 
 		case TileViewMode::Isometric:
 			sprite = type->sprite;
 			overlaySprite = type->overlaySprite;
-			transformedScreenPos -= type->imageOffset;
+			// Pixel offsets are in unscaled screen space, so they have to follow the zoom
+			transformedScreenPos -=
+			    Vec2<float>{type->imageOffset.x * zoom, type->imageOffset.y * zoom};
 			break;
 		case TileViewMode::Strategy:
 			sprite = type->strategySprite;
@@ -42,7 +44,8 @@ void TileObjectScenery::draw(Renderer &r, TileTransform &transform, Vec2<float> 
 			// FIXME: Not true for large sprites (2x2 UFOs?)
 			if (sprite)
 			{
-				transformedScreenPos -= sprite->size / (unsigned)2;
+				transformedScreenPos -= Vec2<float>{(float)sprite->size.x * 0.5f * zoom,
+				                                    (float)sprite->size.y * 0.5f * zoom};
 			}
 			break;
 		default:
@@ -52,7 +55,8 @@ void TileObjectScenery::draw(Renderer &r, TileTransform &transform, Vec2<float> 
 	{
 		if (visible)
 		{
-			r.draw(sprite, transformedScreenPos);
+			Vec2<float> scaledSize{(float)sprite->size.x * zoom, (float)sprite->size.y * zoom};
+			r.drawScaled(sprite, transformedScreenPos, scaledSize, Renderer::Scaler::Linear);
 		}
 		else
 		{
@@ -64,7 +68,9 @@ void TileObjectScenery::draw(Renderer &r, TileTransform &transform, Vec2<float> 
 	{
 		if (visible)
 		{
-			r.draw(overlaySprite, transformedScreenPos);
+			Vec2<float> scaledSize{(float)overlaySprite->size.x * zoom,
+			                       (float)overlaySprite->size.y * zoom};
+			r.drawScaled(overlaySprite, transformedScreenPos, scaledSize, Renderer::Scaler::Linear);
 		}
 		else
 		{

@@ -23,14 +23,19 @@ void TileObject::setBounds(Vec3<float> bounds)
 	this->bounds_div_2 = bounds / 2.0f;
 }
 
-void TileObject::drawTinted(Renderer &r, sp<Image> sprite, Vec2<float> position, bool visible)
+void TileObject::drawTinted(Renderer &r, sp<Image> sprite, Vec2<float> position, bool visible,
+                            float zoom)
 {
 	if (visible)
 	{
-		r.draw(sprite, position);
+		// Scale the sprite so that it matches the tile size the view is using
+		Vec2<float> scaledSize{(float)sprite->size.x * zoom, (float)sprite->size.y * zoom};
+		r.drawScaled(sprite, position, scaledSize, Renderer::Scaler::Linear);
 	}
 	else
 	{
+		// FIXME: The renderer has no scaled variant of drawTinted, so non-visible objects
+		// keep their native size and are drawn too large when zoomed in.
 		r.drawTinted(sprite, position, COLOUR_BLACK);
 	}
 }

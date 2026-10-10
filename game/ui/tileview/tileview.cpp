@@ -10,10 +10,24 @@
 namespace OpenApoc
 {
 
+namespace
+{
+// Scales a single tile size component by the zoom factor, keeping it at 1 or above so
+// that code dividing by a tile size can never divide by zero
+int scaleTileSizeComponent(int value, float zoom)
+{
+	int scaled = (int)((float)value * zoom);
+	return scaled > 0 ? scaled : 1;
+}
+} // namespace
+
+const std::vector<float> TileView::ZOOM_LEVELS = {0.5f, 0.75f, 1.0f, 1.5f, 2.0f};
+
 TileView::TileView(TileMap &map, Vec3<int> isoTileSize, Vec2<int> stratTileSize,
                    TileViewMode initialMode)
     : Stage(), map(map), isoTileSize(isoTileSize), stratTileSize(stratTileSize),
-      viewMode(initialMode), dpySize(fw().displayGetWidth(), fw().displayGetHeight()),
+      isoTileSizeBase(isoTileSize), stratTileSizeBase(stratTileSize), viewMode(initialMode),
+      dpySize(fw().displayGetWidth(), fw().displayGetHeight()),
       strategyViewBoxColour(212, 176, 172, 255), strategyViewBoxThickness(2.0f),
       selectedTilePosition(0, 0, 0), maxZDraw(map.size.z), centerPos(0, 0, 0),
       isoScrollSpeed(0.5, 0.5), stratScrollSpeed(2.0f, 2.0f)
@@ -22,6 +36,74 @@ TileView::TileView(TileMap &map, Vec3<int> isoTileSize, Vec2<int> stratTileSize,
 }
 
 TileView::~TileView() = default;
+
+float TileView::getZoom() const { return this->zoomLevel; }
+
+int TileView::getZoomStep() const
+{
+	int step = 0;
+	float smallestDelta = this->zoomLevel > ZOOM_LEVELS[0] ? this->zoomLevel - ZOOM_LEVELS[0]
+	                                                       : ZOOM_LEVELS[0] - this->zoomLevel;
+	for (int i = 1; i < (int)ZOOM_LEVELS.size(); i++)
+	{
+		float delta = this->zoomLevel > ZOOM_LEVELS[i] ? this->zoomLevel - ZOOM_LEVELS[i]
+		                                               : ZOOM_LEVELS[i] - this->zoomLevel;
+		if (delta < smallestDelta)
+		{
+			smallestDelta = delta;
+			step = i;
+		}
+	}
+	return step;
+}
+
+void TileView::setZoomLevel(float zoom)
+{
+	// Snap the requested value to the nearest of the supported zoom steps
+	int step = 0;
+	float smallestDelta = zoom > ZOOM_LEVELS[0] ? zoom - ZOOM_LEVELS[0] : ZOOM_LEVELS[0] - zoom;
+	for (int i = 1; i < (int)ZOOM_LEVELS.size(); i++)
+	{
+		float delta = zoom > ZOOM_LEVELS[i] ? zoom - ZOOM_LEVELS[i] : ZOOM_LEVELS[i] - zoom;
+		if (delta < smallestDelta)
+		{
+			smallestDelta = delta;
+			step = i;
+		}
+	}
+	if (ZOOM_LEVELS[step] == this->zoomLevel)
+	{
+		return;
+	}
+
+	// centerPos is stored in tile coordinates, so it is unaffected by the change of
+	// tile size and the view keeps showing the same tile in the middle of the screen
+	this->zoomLevel = ZOOM_LEVELS[step];
+	this->isoTileSize = {scaleTileSizeComponent(this->isoTileSizeBase.x, this->zoomLevel),
+	                     scaleTileSizeComponent(this->isoTileSizeBase.y, this->zoomLevel),
+	                     scaleTileSizeComponent(this->isoTileSizeBase.z, this->zoomLevel)};
+	this->stratTileSize = {scaleTileSizeComponent(this->stratTileSizeBase.x, this->zoomLevel),
+	                       scaleTileSizeComponent(this->stratTileSizeBase.y, this->zoomLevel)};
+	LogInfo("Zoom set to {0}", this->zoomLevel);
+}
+
+void TileView::zoomIn()
+{
+	int step = this->getZoomStep();
+	if (step + 1 < (int)ZOOM_LEVELS.size())
+	{
+		this->setZoomLevel(ZOOM_LEVELS[step + 1]);
+	}
+}
+
+void TileView::zoomOut()
+{
+	int step = this->getZoomStep();
+	if (step > 0)
+	{
+		this->setZoomLevel(ZOOM_LEVELS[step - 1]);
+	}
+}
 
 void TileView::begin() { autoScroll = config().getBool("Options.Misc.AutoScroll"); }
 
@@ -196,6 +278,19 @@ void TileView::eventOccurred(Event *e)
 		scrollRightM = autoScroll && e->mouse().X >= dpySize.x - MOUSE_SCROLL_MARGIN;
 		scrollUpM = autoScroll && e->mouse().Y < MOUSE_SCROLL_MARGIN;
 		scrollDownM = autoScroll && e->mouse().Y >= dpySize.y - MOUSE_SCROLL_MARGIN;
+	}
+	else if (e->type() == EVENT_MOUSE_SCROLL)
+	{
+		// Wheel up zooms in, wheel down zooms out. BattleTileView and CityTileView both
+		// forward their events here, so this covers the battlescape and the cityscape.
+		if (e->mouse().WheelVertical > 0)
+		{
+			this->zoomIn();
+		}
+		else if (e->mouse().WheelVertical < 0)
+		{
+			this->zoomOut();
+		}
 	}
 }
 

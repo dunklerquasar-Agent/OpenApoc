@@ -12,7 +12,7 @@ void TileObjectBattleMapPart::draw(Renderer &r, TileTransform &transform,
                                    Vec2<float> screenPosition, TileViewMode mode, bool visible, int,
                                    bool, bool)
 {
-	std::ignore = transform;
+	const float zoom = transform.getZoom();
 	// Mode isn't used as TileView::tileToScreenCoords already transforms according to the mode
 	auto &type = map_part->type;
 	sp<Image> sprite;
@@ -32,7 +32,9 @@ void TileObjectBattleMapPart::draw(Renderer &r, TileTransform &transform,
 				    map_part->alternative_type ? map_part->alternative_type : map_part->type;
 				sprite = curType->animation_frames[frame];
 			}
-			transformedScreenPos -= type->imageOffset;
+			// Pixel offsets are in unscaled screen space, so they have to follow the zoom
+			transformedScreenPos -=
+			    Vec2<float>{type->imageOffset.x * zoom, type->imageOffset.y * zoom};
 			break;
 		}
 		case TileViewMode::Strategy:
@@ -41,7 +43,8 @@ void TileObjectBattleMapPart::draw(Renderer &r, TileTransform &transform,
 			// FIXME: Not true for large sprites (2x2 UFOs?)
 			if (sprite)
 			{
-				transformedScreenPos -= sprite->size / (unsigned)2;
+				transformedScreenPos -= Vec2<float>{(float)sprite->size.x * 0.5f * zoom,
+				                                    (float)sprite->size.y * 0.5f * zoom};
 			}
 			break;
 		default:
@@ -49,7 +52,7 @@ void TileObjectBattleMapPart::draw(Renderer &r, TileTransform &transform,
 	}
 	if (sprite)
 	{
-		drawTinted(r, sprite, transformedScreenPos, visible);
+		drawTinted(r, sprite, transformedScreenPos, visible, zoom);
 	}
 }
 
