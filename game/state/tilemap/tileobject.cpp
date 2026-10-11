@@ -1,4 +1,5 @@
 #include "game/state/tilemap/tileobject.h"
+#include "framework/image.h"
 #include "framework/logger.h"
 #include "framework/renderer.h"
 #include "game/state/tilemap/tilemap.h"
