@@ -35,9 +35,8 @@ void TileObject::drawTinted(Renderer &r, sp<Image> sprite, Vec2<float> position,
 	}
 	else
 	{
-		// FIXME: The renderer has no scaled variant of drawTinted, so non-visible objects
-		// keep their native size and are drawn too large when zoomed in.
-		r.drawTinted(sprite, position, COLOUR_BLACK);
+		Vec2<float> tintedSize{(float)sprite->size.x * zoom, (float)sprite->size.y * zoom};
+		r.drawScaledTinted(sprite, position, tintedSize, COLOUR_BLACK);
 	}
 }
 

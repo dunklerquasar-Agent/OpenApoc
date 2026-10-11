@@ -43,6 +43,10 @@ class Renderer
 	virtual void drawScaled(sp<Image> i, Vec2<float> position, Vec2<float> size,
 	                        Scaler scaler = Scaler::Linear) = 0;
 	virtual void drawTinted(sp<Image> i, Vec2<float> position, Colour tint) = 0;
+	// Like drawTinted, but draws the image at the given size instead of its native
+	// one, so that cloaked/stunned objects scale along with the zoom level.
+	virtual void drawScaledTinted(sp<Image> i, Vec2<float> position, Vec2<float> size,
+	                             Colour tint) = 0;
 	virtual void drawFilledRect(Vec2<float> position, Vec2<float> size, Colour c) = 0;
 	// drawRect() is expected to grow inwards, so {position, position + size} specifies the bounds
 	// of the rect no matter the thickness

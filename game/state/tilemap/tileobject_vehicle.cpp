@@ -101,18 +101,18 @@ void TileObjectVehicle::drawStatic(Renderer &r, sp<Vehicle> vehicle, TileTransfo
 			// Pixel offsets are in unscaled screen space, so they follow the zoom
 			Vec2<float> pos = screenPosition - Vec2<float>{vehicle->type->image_offset.x * zoom,
 			                                               vehicle->type->image_offset.y * zoom};
+			Vec2<float> scaledSize{(float)closestImage->size.x * zoom,
+			                       (float)closestImage->size.y * zoom};
 			if (vehicle->isCloaked())
 			{
-				r.drawTinted(closestImage, pos, COLOUR_TRANSPARENT);
+				r.drawScaledTinted(closestImage, pos, scaledSize, COLOUR_TRANSPARENT);
 			}
 			else if (vehicle->stunTicksRemaining > 0)
 			{
-				r.drawTinted(closestImage, pos, COLOUR_STUNNED);
+				r.drawScaledTinted(closestImage, pos, scaledSize, COLOUR_STUNNED);
 			}
 			else
 			{
-				Vec2<float> scaledSize{(float)closestImage->size.x * zoom,
-				                       (float)closestImage->size.y * zoom};
 				r.drawScaled(closestImage, pos, scaledSize, Renderer::Scaler::Linear);
 			}
 			break;

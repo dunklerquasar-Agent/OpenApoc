@@ -243,9 +243,8 @@ void draw(Renderer &r, sp<Image> sprite, Vec2<float> screenPosition, bool transp
 
 	if (transparent)
 	{
-		// FIXME: The renderer has no scaled variant of drawTinted, so cloaked units are
-		// drawn at their native size and appear too large when zoomed in.
-		r.drawTinted(sprite, screenPosition, COLOUR_TRANSPARENT);
+		Vec2<float> tintedSize{(float)sprite->size.x * zoom, (float)sprite->size.y * zoom};
+		r.drawScaledTinted(sprite, screenPosition, tintedSize, COLOUR_TRANSPARENT);
 	}
 	else
 	{
