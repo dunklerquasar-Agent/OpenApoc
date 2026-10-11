@@ -66,6 +66,7 @@ void TileObjectShadow::draw(Renderer &r, TileTransform &transform, Vec2<float> s
 				if (!item->falling)
 					break;
 				if (item->item->type->dropped_shadow_sprite)
+				{
 					// Pixel offsets are in unscaled screen space, so they follow the zoom
 					auto iShadow = item->item->type->dropped_shadow_sprite;
 					Vec2<float> iPos = screenPosition -
@@ -73,6 +74,7 @@ void TileObjectShadow::draw(Renderer &r, TileTransform &transform, Vec2<float> s
 					                               item->item->type->shadow_offset.y * zoom};
 					Vec2<float> iSize{(float)iShadow->size.x * zoom, (float)iShadow->size.y * zoom};
 					r.drawScaled(iShadow, iPos, iSize, Renderer::Scaler::Linear);
+				}
 			}
 			break;
 		}
