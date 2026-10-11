@@ -61,6 +61,25 @@ function Assert-Tool([string]$Name, [string]$Hint)
     return $cmd.Source
 }
 
+function Find-Makensis()
+{
+    # makensis liegt nach einer Chocolatey- bzw. Standardinstallation an einem festen
+    # Pfad, der in der gerade laufenden Sitzung noch nicht im PATH enthalten ist.
+    $cmd = Get-Command makensis -ErrorAction SilentlyContinue
+    if ($cmd) { return $cmd.Source }
+
+    $candidates = @(
+        (Join-Path ${env:ProgramFiles(x86)} "NSIS\makensis.exe"),
+        (Join-Path $env:ProgramFiles "NSIS\makensis.exe"),
+        "C:\Program Files (x86)\NSIS\makensis.exe",
+        "C:\Program Files\NSIS\makensis.exe"
+    ) | Where-Object { $_ -and (Test-Path $_) }
+
+    if ($candidates) { return $candidates[0] }
+
+    throw "makensis nicht gefunden. NSIS installieren: https://nsis.sourceforge.io/Download"
+}
+
 # ---------------------------------------------------------------------------
 # 0) Umgebung pruefen
 # ---------------------------------------------------------------------------
@@ -73,7 +92,7 @@ if (-not (Test-Path (Join-Path $repoRoot "CMakeLists.txt")))
 
 Assert-Tool "git"      "Git installieren: https://git-scm.com"
 Assert-Tool "cmake"    "CMake installieren: https://cmake.org/download"
-$makensis = Assert-Tool "makensis" "NSIS installieren: https://nsis.sourceforge.io/Download"
+$makensis = Find-Makensis
 
 if ([string]::IsNullOrWhiteSpace($VcpkgRoot) -or -not (Test-Path $VcpkgRoot))
 {
