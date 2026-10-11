@@ -1,0 +1,58 @@
+# Baut einen Windows-Installer fuer den OpenApoc-Fork mit Zoom-Erweiterung.
+#
+# Der Installer enthaelt KEINE Original-Spieldateien. Bei der Installation wird nach
+# der CD bzw. ISO einer legal erworbenen X-COM: Apocalypse gefragt; das Spiel
+# extrahiert die Daten beim ersten Start selbst daraus.
+#
+# Gebaut wird ohne den Qt-Launcher (BUILD_LAUNCHER=OFF), damit vcpkg nicht das
+# komplette Qt6 ziehen muss. Der Installer startet das Spiel direkt.
+
+name: Windows Installer
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'agent/openapoc/**'
+
+jobs:
+  installer:
+    runs-on: windows-latest
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: NSIS installieren
+        run: choco install nsis -y --no-progress
+
+      - name: vcpkg-Cache vorbereiten
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.VCPKG_INSTALLATION_ROOT }}/installed
+            ~\AppData\Local\vcpkg\archives
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: vcpkg-${{ runner.os }}-
+
+      - name: Installer bauen
+        shell: pwsh
+        run: ./build-installer.ps1 -BuildType Release -VcpkgRoot $env:VCPKG_INSTALLATION_ROOT
+
+      - name: Version ermitteln
+        id: version
+        shell: pwsh
+        run: |
+          $v = "{0}-{1}-{2}" -f (Get-Date -Format "yyyyMMdd"), (git rev-list --count HEAD), (git rev-parse --short HEAD)
+          "version=$v" >> $env:GITHUB_OUTPUT
+
+      - name: Installer als Artefakt hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapoc-installer-${{ steps.version.outputs.version }}
+          path: install/windows/install-openapoc-*.exe
+          if-no-files-found: error
+          retention-days: 30

@@ -24,6 +24,9 @@
 
 	!define GAME_NAME "OpenApoc"
 	!define GAME_AUTHOR "OpenApoc Contributors"
+	; Fork mit Zoom-Erweiterung fuer Battlescape und Cityscape
+	; Die Original-Spieldateien sind NICHT enthalten - der Installer fragt bei der
+	; Installation nach CD bzw. ISO der legal erworbenen X-COM: Apocalypse.
 
 ;--------------------------------
 ;General
@@ -106,7 +109,7 @@
 	!insertmacro MUI_PAGE_INSTFILES
 	
 	;Finish Page Configuration
-	!define MUI_FINISHPAGE_RUN "$INSTDIR\OpenApoc_launcher.exe"
+	!define MUI_FINISHPAGE_RUN "$INSTDIR\OpenApoc.exe"
 	!define MUI_FINISHPAGE_NOREBOOTSUPPORT
 	
 	!insertmacro MUI_PAGE_FINISH
@@ -286,7 +289,7 @@ Section "$(SETUP_GAME)" SecMain
 	!insertmacro MUI_STARTMENU_WRITE_BEGIN Application
 	
 		CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
-		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\${GAME_NAME}.lnk" "$INSTDIR\OpenApoc_launcher.exe"
+		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\${GAME_NAME}.lnk" "$INSTDIR\OpenApoc.exe"
 		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\$(SETUP_SHORTCUT_README).lnk" "$INSTDIR\README.txt"
 ${If} $PortableMode == ${BST_CHECKED}
 		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\$(SETUP_SHORTCUT_USER).lnk" "$INSTDIR"
@@ -303,7 +306,7 @@ Section /o "$(SETUP_DESKTOP)" SecDesktop
 
 	SetOutPath "$INSTDIR"
 	
-	CreateShortCut "$DESKTOP\${GAME_NAME}.lnk" "$INSTDIR\OpenApoc_launcher.exe"
+	CreateShortCut "$DESKTOP\${GAME_NAME}.lnk" "$INSTDIR\OpenApoc.exe"
 
 SectionEnd
 
