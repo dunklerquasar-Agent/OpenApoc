@@ -41,9 +41,9 @@ void TileObjectShadow::draw(Renderer &r, TileTransform &transform, Vec2<float> s
 			{
 				// Pixel offsets are in unscaled screen space, so they follow the zoom
 				auto vShadow = vehicle->type->directional_shadow_sprites[vehicle->shadowDirection];
-				Vec2<float> vPos = screenPosition -
-				                   Vec2<float>{vehicle->type->shadow_offset.x * zoom,
-				                               vehicle->type->shadow_offset.y * zoom};
+				Vec2<float> vPos =
+				    screenPosition - Vec2<float>{vehicle->type->shadow_offset.x * zoom,
+				                                 vehicle->type->shadow_offset.y * zoom};
 				Vec2<float> vSize{(float)vShadow->size.x * zoom, (float)vShadow->size.y * zoom};
 				r.drawScaled(vShadow, vPos, vSize, Renderer::Scaler::Linear);
 			}
@@ -69,9 +69,9 @@ void TileObjectShadow::draw(Renderer &r, TileTransform &transform, Vec2<float> s
 				{
 					// Pixel offsets are in unscaled screen space, so they follow the zoom
 					auto iShadow = item->item->type->dropped_shadow_sprite;
-					Vec2<float> iPos = screenPosition -
-					                   Vec2<float>{item->item->type->shadow_offset.x * zoom,
-					                               item->item->type->shadow_offset.y * zoom};
+					Vec2<float> iPos =
+					    screenPosition - Vec2<float>{item->item->type->shadow_offset.x * zoom,
+					                                 item->item->type->shadow_offset.y * zoom};
 					Vec2<float> iSize{(float)iShadow->size.x * zoom, (float)iShadow->size.y * zoom};
 					r.drawScaled(iShadow, iPos, iSize, Renderer::Scaler::Linear);
 				}

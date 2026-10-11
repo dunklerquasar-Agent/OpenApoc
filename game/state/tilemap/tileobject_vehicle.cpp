@@ -32,8 +32,8 @@ namespace
 {
 // Draws a strategy icon scaled by the zoom factor. 'offset' is the unscaled pixel offset
 // from the tile position, so it has to follow the zoom as well.
-void drawStrategyIcon(Renderer &r, sp<Image> sprite, Vec2<float> screenPosition,
-                      Vec2<float> offset, float zoom)
+void drawStrategyIcon(Renderer &r, sp<Image> sprite, Vec2<float> screenPosition, Vec2<float> offset,
+                      float zoom)
 {
 	if (!sprite)
 	{
@@ -146,28 +146,28 @@ void TileObjectVehicle::drawStatic(Renderer &r, sp<Vehicle> vehicle, TileTransfo
 			switch (vehicle->type->mapIconType)
 			{
 				case VehicleType::MapIconType::Arrow:
-					drawStrategyIcon(
-					    r,
-					    vehicle->strategyImages->at(side_offset * 14 + offset_arrow + facing_offset),
-					    screenPosition, Vec2<float>{4, 4}, zoom);
+					drawStrategyIcon(r,
+					                 vehicle->strategyImages->at(side_offset * 14 + offset_arrow +
+					                                             facing_offset),
+					                 screenPosition, Vec2<float>{4, 4}, zoom);
 					break;
 				case VehicleType::MapIconType::SmallCircle:
 					drawStrategyIcon(r, vehicle->strategyImages->at(side_offset * 14),
 					                 screenPosition, Vec2<float>{4, 4}, zoom);
 					break;
 				case VehicleType::MapIconType::LargeCircle:
-					drawStrategyIcon(r,
-					                 vehicle->strategyImages->at(side_offset * 14 + offset_large + 0),
-					                 screenPosition, Vec2<float>{8.0f, 8.0f}, zoom);
-					drawStrategyIcon(r,
-					                 vehicle->strategyImages->at(side_offset * 14 + offset_large + 1),
-					                 screenPosition, Vec2<float>{0.0f, 8.0f}, zoom);
-					drawStrategyIcon(r,
-					                 vehicle->strategyImages->at(side_offset * 14 + offset_large + 2),
-					                 screenPosition, Vec2<float>{8.0f, 0.0f}, zoom);
-					drawStrategyIcon(r,
-					                 vehicle->strategyImages->at(side_offset * 14 + offset_large + 3),
-					                 screenPosition, Vec2<float>{0.0f, 0.0f}, zoom);
+					drawStrategyIcon(
+					    r, vehicle->strategyImages->at(side_offset * 14 + offset_large + 0),
+					    screenPosition, Vec2<float>{8.0f, 8.0f}, zoom);
+					drawStrategyIcon(
+					    r, vehicle->strategyImages->at(side_offset * 14 + offset_large + 1),
+					    screenPosition, Vec2<float>{0.0f, 8.0f}, zoom);
+					drawStrategyIcon(
+					    r, vehicle->strategyImages->at(side_offset * 14 + offset_large + 2),
+					    screenPosition, Vec2<float>{8.0f, 0.0f}, zoom);
+					drawStrategyIcon(
+					    r, vehicle->strategyImages->at(side_offset * 14 + offset_large + 3),
+					    screenPosition, Vec2<float>{0.0f, 0.0f}, zoom);
 					break;
 			}
 

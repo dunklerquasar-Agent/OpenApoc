@@ -10,7 +10,7 @@ namespace OpenApoc
 {
 
 void TileObjectBattleItem::draw(Renderer &r, TileTransform &transform, Vec2<float> screenPosition,
-                                 TileViewMode mode, bool visible, int, bool, bool)
+                                TileViewMode mode, bool visible, int, bool, bool)
 {
 	// Mode isn't used as TileView::tileToScreenCoords already transforms according to the mode
 	std::ignore = mode;

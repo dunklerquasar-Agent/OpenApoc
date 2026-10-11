@@ -9,9 +9,8 @@
 namespace OpenApoc
 {
 
-void TileObjectBattleHazard::draw(Renderer &r, TileTransform &transform,
-                                   Vec2<float> screenPosition, TileViewMode mode, bool visible, int,
-                                   bool, bool)
+void TileObjectBattleHazard::draw(Renderer &r, TileTransform &transform, Vec2<float> screenPosition,
+                                  TileViewMode mode, bool visible, int, bool, bool)
 {
 	if (!visible)
 	{
@@ -35,9 +34,8 @@ void TileObjectBattleHazard::draw(Renderer &r, TileTransform &transform,
 		case TileViewMode::Isometric:
 			sprite = h->hazardType->getFrame(h->age, h->frame);
 			// Pixel offsets are in unscaled screen space, so they follow the zoom
-			transformedScreenPos -=
-			    Vec2<float>{h->hazardType->doodadType->imageOffset.x * zoom,
-			                h->hazardType->doodadType->imageOffset.y * zoom};
+			transformedScreenPos -= Vec2<float>{h->hazardType->doodadType->imageOffset.x * zoom,
+			                                    h->hazardType->doodadType->imageOffset.y * zoom};
 			break;
 		case TileViewMode::Strategy:
 		{

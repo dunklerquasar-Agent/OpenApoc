@@ -94,7 +94,7 @@ void TileObjectBattleUnit::draw(Renderer &r, TileTransform &transform, Vec2<floa
 				                     unit->burningDoodad->frames.size() * age / maxLifetime);
 				sprite = unit->burningDoodad->frames[frame].image;
 
-								// Pixel offsets are in unscaled screen space, so they follow the zoom
+				// Pixel offsets are in unscaled screen space, so they follow the zoom
 				transformedScreenPos -= Vec2<float>{unit->burningDoodad->imageOffset.x * zoom,
 				                                    unit->burningDoodad->imageOffset.y * zoom};
 				drawTinted(r, sprite, transformedScreenPos, visible, zoom);

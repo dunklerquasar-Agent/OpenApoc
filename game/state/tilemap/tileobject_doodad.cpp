@@ -29,8 +29,8 @@ void TileObjectDoodad::draw(Renderer &r, TileTransform &transform, Vec2<float> s
 		case TileViewMode::Isometric:
 			sprite = doodad->getSprite();
 			// Pixel offsets are in unscaled screen space, so they follow the zoom
-			transformedScreenPos -= Vec2<float>{doodad->getImageOffset().x * zoom,
-			                                    doodad->getImageOffset().y * zoom};
+			transformedScreenPos -=
+			    Vec2<float>{doodad->getImageOffset().x * zoom, doodad->getImageOffset().y * zoom};
 			break;
 		case TileViewMode::Strategy:
 			// no doodads on strategy view?
