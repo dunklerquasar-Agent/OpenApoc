@@ -154,7 +154,11 @@ if (-not $SkipBuild)
         "-DCMAKE_TOOLCHAIN_FILE=$vcpkgToolchain",
         "-DVCPKG_TARGET_TRIPLET=x64-windows",
         "-DEXTRACT_DATA=OFF",
-        "-DBUILD_LAUNCHER=OFF"
+        "-DBUILD_LAUNCHER=OFF",
+        # Die Unit-Tests sind fuer den Installer nicht noetig. Sie bauen auf
+        # diesem Runner zudem nicht durch (vorbestehender MSVC-Konflikt in
+        # gamestate_serialize.h), das Spiel selbst aber sehr wohl.
+        "-DENABLE_TESTS=OFF"
     )
     if ($Generator -like "Visual Studio*")
     {
