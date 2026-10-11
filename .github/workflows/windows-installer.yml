@@ -41,9 +41,12 @@ jobs:
           key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
           restore-keys: vcpkg-${{ runner.os }}-
 
+      - name: MSVC-Umgebung bereitstellen
+        uses: ilammy/msvc-dev-cmd@v1
+
       - name: Installer bauen
         shell: pwsh
-        run: ./build-installer.ps1 -BuildType Release -VcpkgRoot $env:VCPKG_INSTALLATION_ROOT
+        run: ./build-installer.ps1 -BuildType Release -Generator Ninja -VcpkgRoot $env:VCPKG_INSTALLATION_ROOT
 
       - name: Version ermitteln
         id: version

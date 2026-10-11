@@ -38,6 +38,11 @@ param(
     [ValidateSet("Release", "RelWithDebInfo", "Debug")]
     [string]$BuildType = "Release",
 
+    # CMake-Generator. Ninja ist der Standard, weil CMake damit keine
+    # Visual-Studio-Instanz suchen muss (reicht: cl.exe im PATH via vcvarsall).
+    [ValidateSet("Ninja", "Visual Studio 17 2022")]
+    [string]$Generator = "Ninja",
+
     [string]$VcpkgRoot = $env:VCPKG_INSTALLATION_ROOT,
 
     [switch]$SkipBuild
@@ -142,16 +147,39 @@ if ($LASTEXITCODE -ne 0) { throw "vcpkg install fehlgeschlagen." }
 if (-not $SkipBuild)
 {
     Write-Step "Konfiguriere CMake ($BuildType)"
-    cmake -S $repoRoot -B (Join-Path $repoRoot "build") `
-          -G "Visual Studio 17 2022" -A x64 `
-          -DCMAKE_TOOLCHAIN_FILE="$vcpkgToolchain" `
-          -DVCPKG_TARGET_TRIPLET="x64-windows" `
-          -DEXTRACT_DATA=OFF `
-          -DBUILD_LAUNCHER=OFF
+    $cmakeArgs = @(
+        "-S", $repoRoot,
+        "-B", (Join-Path $repoRoot "build"),
+        "-G", $Generator,
+        "-DCMAKE_TOOLCHAIN_FILE=$vcpkgToolchain",
+        "-DVCPKG_TARGET_TRIPLET=x64-windows",
+        "-DEXTRACT_DATA=OFF",
+        "-DBUILD_LAUNCHER=OFF"
+    )
+    if ($Generator -like "Visual Studio*")
+    {
+        # Multi-Config-Generator: Architektur und Config kommen spaeter
+        $cmakeArgs += @("-A", "x64")
+    }
+    else
+    {
+        # Single-Config-Generator (Ninja): Buildtyp schon hier festlegen
+        $cmakeArgs += "-DCMAKE_BUILD_TYPE=$BuildType"
+    }
+    Write-Host "  Generator: $Generator"
+    cmake @cmakeArgs
     if ($LASTEXITCODE -ne 0) { throw "CMake-Konfiguration fehlgeschlagen." }
 
     Write-Step "Baue (das dauert einige Minuten)"
-    cmake --build (Join-Path $repoRoot "build") --config $BuildType -- /m
+    $buildDir = Join-Path $repoRoot "build"
+    if ($Generator -like "Visual Studio*")
+    {
+        cmake --build $buildDir --config $BuildType -- /m
+    }
+    else
+    {
+        cmake --build $buildDir --config $BuildType
+    }
     if ($LASTEXITCODE -ne 0) { throw "Build fehlgeschlagen." }
 }
 
